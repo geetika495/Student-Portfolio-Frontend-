@@ -1,0 +1,193 @@
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import "../styles/dashboard.css";
+import "../styles/myprojects.css";
+import Sidebar from "../components/Sidebar";
+export default function MyProjects() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [projects, setProjects] = useState([]);
+  const [showDebug, setShowDebug] = useState(false);
+
+  const normalizeTech = (tech) => {
+    if (Array.isArray(tech)) return tech;
+    if (typeof tech === 'string') return tech.split(',').map(t => t.trim()).filter(Boolean);
+    return [];
+  };
+  
+  const email = localStorage.getItem("currentUser") || "user@gmail.com";
+  const userName = localStorage.getItem("userName") || email.split("@")[0];
+
+  const loadUserProjects = async () => {
+    const currentUserEmail = localStorage.getItem("currentUser");
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/projects/user/${currentUserEmail}`);
+      if (response.ok) {
+        const userProjects = await response.json();
+        setProjects(userProjects);
+      }
+    } catch (error) {
+      console.error("Failed to load user projects", error);
+    }
+  };
+
+  useEffect(() => {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
+    
+    // Check authentication
+    const isLoggedIn = localStorage.getItem("loggedIn");
+    if (!isLoggedIn || isLoggedIn !== "true") {
+      navigate("/", { replace: true });
+      return;
+    }
+    
+    loadUserProjects();
+  }, [location.pathname, navigate]); // Refresh when navigating to this page
+
+  const viewProject = (id) => {
+    console.debug("MyProjects: navigating to project id=", id);
+    navigate(`/project/${id}`);
+  };
+
+  const deleteProject = async (id) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/projects/${id}`, { method: 'DELETE' });
+        loadUserProjects();
+      } catch (error) {
+        console.error("Failed to delete project", error);
+      }
+    }
+  };
+
+  return (
+    <div className="layout">
+      <Sidebar />
+
+      <div className="main">
+        <div className="topbar">
+          <div className="search-container">
+            <span className="search-icon">🔍</span>
+            <input
+              className="search"
+              placeholder="Search projects, students..."
+            />
+          </div>
+
+          <div className="topbar-right">
+            <div className="notification-bell">🔔</div>
+            <div className="profile">
+              <div>
+                <h4>{userName}</h4>
+                <p>{email}</p>
+              </div>
+              <div className="avatar">
+                {userName.split(" ").map(n => n[0]).join("").toUpperCase()}
+              </div>
+            </div>
+            <span className="help-icon">?</span>
+            <button className="share-btn">Share</button>
+          </div>
+        </div>
+
+        <div className="content">
+          <h1>My Portfolio</h1>
+          <p>Showcase of your {projects.length} amazing {projects.length === 1 ? 'project' : 'projects'}</p>
+
+          {/* Debug toggle - remove in production */}
+          <div style={{ marginTop: 8 }}>
+            <button
+              style={{ fontSize: 12, padding: '6px 10px' }}
+              onClick={() => setShowDebug(s => !s)}
+            >
+              {showDebug ? 'Hide' : 'Show'} Debug Info
+            </button>
+          </div>
+
+          {projects.length === 0 ? (
+            <div className="empty-state">
+              <p>📁 You haven't uploaded any projects yet.</p>
+              <button 
+                className="upload-first-btn" 
+                onClick={() => navigate("/upload")}
+              >
+                Upload Your First Project
+              </button>
+            </div>
+          ) : (
+            <div className="projects-grid">
+              {projects.map((project) => (
+                <div key={project.id} className="project-card">
+                  <div className="project-image-container">
+                    <img 
+                      src={project.image || "https://via.placeholder.com/400x250"} 
+                      alt={project.title}
+                      className="project-image"
+                    />
+                    {project.public !== false && (
+                      <span className="public-badge">🌐 Public</span>
+                    )}
+                  </div>
+                  <div className="project-card-content">
+                    <h3>{project.title}</h3>
+                    <p className="project-description">
+                      {project.description || project.desc || "No description"}
+                    </p>
+                    {normalizeTech(project.tech).length > 0 && (
+                      <div className="tech-tags">
+                        {normalizeTech(project.tech).slice(0, 3).map((tech, i) => (
+                          <span key={i} className="tech-tag">{tech}</span>
+                        ))}
+                        {normalizeTech(project.tech).length > 3 && (
+                          <span className="tech-tag more">+{normalizeTech(project.tech).length - 3}</span>
+                        )}
+                      </div>
+                    )}
+                    <div className="project-card-actions">
+                      <button
+                        className="view-details-btn"
+                        onClick={() => viewProject(project.id)}
+                      >
+                        View Details 🔗
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => deleteProject(project.id)}
+                      >
+                        Delete 🗑️
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showDebug && (
+            <div className="debug-panel" style={{ marginTop: 20, background: '#fff7ed', padding: 12, borderRadius: 8 }}>
+              <h3 style={{ margin: 0 }}>Debug: Stored Projects</h3>
+              <p style={{ marginTop: 6, marginBottom: 8, color: '#6b7280' }}>Click an ID to navigate to its details.</p>
+              <div style={{ maxHeight: 220, overflow: 'auto' }}>
+                {projects.length === 0 ? (
+                  <p style={{ color: '#6b7280' }}>No projects in localStorage for current user.</p>
+                ) : (
+                  <ul style={{ paddingLeft: 16, margin: 0 }}>
+                    {projects.map((p) => (
+                      <li key={String(p.id)} style={{ marginBottom: 6 }}>
+                        <strong>{p.title || '(no title)'}</strong>
+                        <div style={{ fontSize: 12, color: '#374151' }}>
+                          ID: <button style={{ fontSize: 12, marginLeft: 6 }} onClick={() => viewProject(p.id)}>{String(p.id)}</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
