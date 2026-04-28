@@ -24,7 +24,7 @@ export default function MyProjects() {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/projects/user/${currentUserEmail}`);
       if (response.ok) {
         const userProjects = await response.json();
-        setProjects(userProjects);
+        setProjects(userProjects);//READ
       }
     } catch (error) {
       console.error("Failed to load user projects", error);
@@ -32,10 +32,8 @@ export default function MyProjects() {
   };
 
   useEffect(() => {
-    // Scroll to top when page loads
     window.scrollTo(0, 0);
-    
-    // Check authentication
+
     const isLoggedIn = localStorage.getItem("loggedIn");
     if (!isLoggedIn || isLoggedIn !== "true") {
       navigate("/", { replace: true });
@@ -43,16 +41,17 @@ export default function MyProjects() {
     }
     
     loadUserProjects();
-  }, [location.pathname, navigate]); // Refresh when navigating to this page
+  }, [location.pathname, navigate]);
 
   const viewProject = (id) => {
     console.debug("MyProjects: navigating to project id=", id);
-    navigate(`/project/${id}`);
+    navigate(`/project/${id}`);//READ 
   };
 
   const deleteProject = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
+        //DELETE 
         await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/projects/${id}`, { method: 'DELETE' });
         loadUserProjects();
       } catch (error) {

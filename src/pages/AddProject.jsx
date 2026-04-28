@@ -25,7 +25,7 @@ export default function AddProject() {
   })
   .then(res => res.json())
   .then(() => {
-    navigate("/my-projects"); // keep your flow
+    navigate("/my-projects"); 
   });
 };
 

@@ -5,10 +5,10 @@ import "../styles/login.css";
 export default function Login() {
   const navigate = useNavigate();
 
-  // ✅ state (you were missing this)
+
   const [login, setLogin] = useState({ email: "", password: "" });
+
   
-  // Captcha state
   const [captchaText, setCaptchaText] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [userCaptcha, setUserCaptcha] = useState("");
@@ -54,22 +54,25 @@ export default function Login() {
 
         localStorage.setItem("user", JSON.stringify(data));
         localStorage.setItem("userName", data.name);
+
+        //Authetication -verify user and password and then store email
+        //sm- keeps track of logging in user
+
         localStorage.setItem("currentUser", data.email);
         localStorage.setItem("loggedIn", "true");
-
+        
+      //error handling and validation
         alert("Login Successful!");
-        navigate("/dashboard"); // keep safe (or "/dashboard" if exists)
+        navigate("/dashboard"); 
       } else {
         alert("Invalid Credentials");
       }
-
     } catch (error) {
       console.error("Error:", error);
       alert("Server error");
     }
   };
 
-  // ✅ return INSIDE function
   return (
     <div className="login-wrapper">
       <div className="login-card">

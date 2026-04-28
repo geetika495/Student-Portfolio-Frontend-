@@ -24,6 +24,9 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* APP */}
+        //routing to different pages-
+        decides which component to show based on url
+
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/upload" element={<UploadProject />} />
         <Route path="/projects" element={<MyProjects />} />

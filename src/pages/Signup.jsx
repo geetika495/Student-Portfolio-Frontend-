@@ -25,8 +25,7 @@ export default function Signup() {
 
       if (response.ok) {
         const savedUser = await response.json();
-        // Since it's just signup, maybe they need to login or we log them in implicitly
-        // We'll just guide them to login to be safe, or log them in directly
+        //Authetication -verify user and password and then store email
         localStorage.setItem("user", JSON.stringify(savedUser));
         localStorage.setItem("userName", savedUser.name);
         

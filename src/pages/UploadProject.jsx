@@ -7,9 +7,7 @@ import "../styles/dashboard.css";
 export default function UploadProject() {
   const navigate = useNavigate();
 
-  // Check authentication
   useEffect(() => {
-    // Scroll to top when page loads
     window.scrollTo(0, 0);
     
     const isLoggedIn = localStorage.getItem("loggedIn");
@@ -45,13 +43,11 @@ export default function UploadProject() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Check file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         alert("File size exceeds 10MB limit. Please choose a smaller image.");
         return;
       }
-      
-      // Check file type
+
       if (!file.type.startsWith('image/')) {
         alert("Please select an image file.");
         return;
@@ -68,8 +64,7 @@ export default function UploadProject() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate required fields
+
     if (!formData.title.trim()) {
       alert("Please enter a project title.");
       return;
@@ -107,9 +102,10 @@ export default function UploadProject() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newProject)
-      });
+      });//Create new project
       
-      // Add to recent activities
+      //FETCH used to log activity
+      //fetch api used to talk to backend and send data to backend
       await fetch(import.meta.env.VITE_API_BASE_URL + "/api/activities", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,8 +115,7 @@ export default function UploadProject() {
           timestamp: new Date().toISOString()
         })
       });
-      
-      // Reset form
+
       setFormData({
         title: "",
         description: "",
